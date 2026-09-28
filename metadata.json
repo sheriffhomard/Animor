@@ -1,0 +1,6 @@
+{
+  "name": "Animor",
+  "description": "Studio local-first et PWA d'animation de données : transformez vos fichiers Excel et CSV en visualisations animées fluides (Barres, Classement, Bulles) et exportez en WebM, SVG, PNG ou HTML autonome sans aucun serveur.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
