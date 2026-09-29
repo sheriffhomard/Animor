@@ -64,8 +64,88 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
     { type: 'easeInOut', label: 'Ease In-Out' },
   ];
 
+  const isMulti = Boolean(
+    project.dataset.isMultiSeries ||
+    (project.dataset.seriesColumns && project.dataset.seriesColumns.length > 1)
+  );
+
+  const seriesList = project.dataset.seriesColumns || [project.dataset.valueColumn || 'Valeur'];
+
   return (
     <div className="flex flex-col h-full space-y-5 overflow-y-auto pr-1">
+      {/* Multi-Series / Dimension Temporelle Badge & Selector */}
+      {isMulti && (
+        <div className="bg-indigo-950/40 border border-indigo-500/40 rounded-xl p-3 space-y-2.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-white flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-indigo-400" />
+              Mode Multi-Séries / Temporel
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono font-semibold">
+              {seriesList.length} colonnes
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-1.5 text-xs">
+            <button
+              onClick={() => updateAnimation({ multiSeriesMode: 'time_race' })}
+              className={`p-2 rounded-lg border text-center transition font-semibold text-[11px] ${
+                (animation.multiSeriesMode ?? 'time_race') === 'time_race'
+                  ? 'bg-indigo-600 border-indigo-400 text-white shadow-sm'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              ⏱️ Course (Race)
+            </button>
+            <button
+              onClick={() => updateAnimation({ multiSeriesMode: 'grouped' })}
+              className={`p-2 rounded-lg border text-center transition font-semibold text-[11px] ${
+                animation.multiSeriesMode === 'grouped'
+                  ? 'bg-indigo-600 border-indigo-400 text-white shadow-sm'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              📊 Groupées
+            </button>
+            <button
+              onClick={() => updateAnimation({ multiSeriesMode: 'single' })}
+              className={`p-2 rounded-lg border text-center transition font-semibold text-[11px] ${
+                animation.multiSeriesMode === 'single'
+                  ? 'bg-indigo-600 border-indigo-400 text-white shadow-sm'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              🎯 Série Unique
+            </button>
+          </div>
+
+          {animation.multiSeriesMode === 'single' && (
+            <div className="pt-1">
+              <span className="text-[10px] text-slate-400 block mb-1">Choisir la colonne à animer :</span>
+              <select
+                value={animation.activeSeries || seriesList[0]}
+                onChange={(e) => updateAnimation({ activeSeries: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-1.5 text-xs text-slate-200 focus:outline-none"
+              >
+                {seriesList.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[11px]">
+            <span className="text-slate-400">Afficher filigrane temporel (ex: 2024)</span>
+            <input
+              type="checkbox"
+              checked={animation.showTimeWatermark !== false}
+              onChange={(e) => updateAnimation({ showTimeWatermark: e.target.checked })}
+              className="accent-indigo-500 cursor-pointer"
+            />
+          </div>
+        </div>
+      )}
+
       {/* 1. Mode de Visualisation */}
       <div className="space-y-2">
         <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -302,6 +382,31 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
                 }`}
               >
                 {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Limite configurable d'éléments animés */}
+        <div className="pt-2 border-t border-slate-800/80">
+          <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+            <span>Éléments affichés dans l'animation</span>
+            <span className="text-slate-200 font-semibold font-mono">
+              {(animation.maxVisibleItems ?? 15) === 0 ? 'Tous' : `Top ${animation.maxVisibleItems ?? 15}`}
+            </span>
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {[10, 15, 20, 30, 50, 100, 0].map((lim) => (
+              <button
+                key={lim}
+                onClick={() => updateAnimation({ maxVisibleItems: lim })}
+                className={`py-1 rounded text-[10px] font-mono font-semibold transition ${
+                  (animation.maxVisibleItems ?? 15) === lim
+                    ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
+                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                {lim === 0 ? 'Tous' : lim}
               </button>
             ))}
           </div>

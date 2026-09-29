@@ -65,7 +65,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
       {/* Center Data Status Pill */}
       <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 bg-slate-900/60 border border-slate-800/80 px-3 py-1 rounded-full">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span>Données prêtes : <strong className="text-slate-200">{rowCount}/10 lignes</strong></span>
+        <span>Données prêtes : <strong className="text-slate-200">{rowCount} ligne{rowCount > 1 ? 's' : ''}</strong></span>
       </div>
 
       {/* Action Buttons */}

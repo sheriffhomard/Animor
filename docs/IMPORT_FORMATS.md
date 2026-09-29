@@ -34,7 +34,7 @@
 | Règle | Statut | Comportement si non respecté |
 | :--- | :--- | :--- |
 | **Colonnes** | Exactement 2 | Message d'erreur explicite |
-| **Lignes** | 1 à 10 | Rejet avec message d'erreur si > 10 ou 0 |
+| **Lignes** | 1 à plusieurs milliers | Rejet si 0 ligne, avertissement de performance au-delà de 10 000 |
 | **En-tête** | Obligatoire en ligne 1 | Message d'erreur si absent ou vide |
 | **Valeurs numériques** | Positives, négatives, nulles | Rejet si texte non numérique, NaN ou Infinity |
 | **Doublons de label** | Autorisés | Alerte d'avertissement affichée |

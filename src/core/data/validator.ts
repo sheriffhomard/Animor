@@ -11,13 +11,13 @@ export interface RawParsedData {
 }
 
 /**
- * Validates raw extracted data according to Animor V1 rules:
- * - Exactly 2 columns
- * - Minimum 1 data row, maximum 10 data rows
+ * Validates raw extracted data:
+ * - At least 2 columns: Column 1 = Label, Column 2..N = Numeric Series (temporal or categorical)
+ * - Minimum 1 data row, up to several thousand rows supported
  * - Header present
- * - Numeric values valid (positive, negative, zero allowed; NaN / Infinity forbidden)
+ * - Numeric values valid across all series columns (positive, negative, zero allowed)
  * - Empty cells detected
- * - Duplicate labels flagged
+ * - Duplicate labels flagged as warning
  */
 export function validateRawData(raw: RawParsedData): ValidationResult {
   const issues: ValidationIssue[] = [];
@@ -26,15 +26,15 @@ export function validateRawData(raw: RawParsedData): ValidationResult {
   if (!raw.headers || raw.headers.length === 0) {
     issues.push({
       type: 'error',
-      message: 'Aucun en-tête trouvé. La première ligne doit contenir les noms des deux colonnes.',
+      message: 'Aucun en-tête trouvé. La première ligne doit contenir les noms des colonnes.',
     });
-    return { isValid: false, issues };
+    return { isValid: false, issues, detectedSeriesCount: 0 };
   }
 
-  if (raw.headers.length !== 2) {
+  if (raw.headers.length < 2) {
     issues.push({
       type: 'error',
-      message: `Animor V1 accepte exactement 2 colonnes (Label et Valeur). Détecté : ${raw.headers.length} colonnes.`,
+      message: `Animor nécessite au minimum 2 colonnes (1 colonne Label et au moins 1 colonne numérique). Détecté : ${raw.headers.length} colonne.`,
     });
   }
 
@@ -53,30 +53,31 @@ export function validateRawData(raw: RawParsedData): ValidationResult {
       type: 'error',
       message: 'Le jeu de données ne contient aucune ligne de données (minimum 1 ligne requise).',
     });
-  } else if (rowCount > 10) {
+  } else if (rowCount > 10000) {
     issues.push({
-      type: 'error',
-      message: `Animor V1 accepte au maximum 10 lignes de données. Reçu : ${rowCount} lignes.`,
+      type: 'warning',
+      message: `Jeu de données très volumineux (${rowCount} lignes). Pour préserver les performances du navigateur, une limite d'affichage sera appliquée.`,
     });
   }
 
   const seenLabels = new Set<string>();
+  const totalCols = raw.headers.length;
+  const seriesCount = Math.max(0, totalCols - 1);
 
   // Check each row
   raw.rows.forEach((row, index) => {
     const rowNum = index + 2; // 1-indexed, accounting for header row
 
-    // Column count in row
-    if (row.length !== 2) {
+    // Column count in row: can be less if trailing empty cells, or more
+    if (row.length !== totalCols) {
       issues.push({
-        type: 'error',
-        message: `La ligne ${rowNum} comporte ${row.length} colonne(s) au lieu de 2.`,
+        type: 'warning',
+        message: `La ligne ${rowNum} comporte ${row.length} colonne(s) au lieu de ${totalCols}. Les cellules manquantes seront traitées comme nulles.`,
         row: rowNum,
       });
-      return;
     }
 
-    const [rawLabel, rawValue] = row;
+    const rawLabel = row[0];
 
     // Check label
     if (rawLabel === null || rawLabel === undefined || String(rawLabel).trim() === '') {
@@ -99,37 +100,43 @@ export function validateRawData(raw: RawParsedData): ValidationResult {
       seenLabels.add(trimmedLabel.toLowerCase());
     }
 
-    // Check numeric value
-    if (rawValue === null || rawValue === undefined || String(rawValue).trim() === '') {
-      issues.push({
-        type: 'error',
-        message: `La ligne ${rowNum} a une valeur manquante.`,
-        row: rowNum,
-        column: raw.headers[1] || 'Colonne 2',
-      });
-    } else {
-      let numVal: number;
-      if (typeof rawValue === 'number') {
-        numVal = rawValue;
-      } else {
-        const cleanStr = String(rawValue).trim().replace(/\s+/g, '').replace(',', '.');
-        numVal = Number(cleanStr);
-      }
+    // Check numeric values across all series columns (index 1 to totalCols - 1)
+    for (let c = 1; c < totalCols; c++) {
+      const rawValue = row[c];
+      const colName = raw.headers[c] || `Série ${c}`;
 
-      if (Number.isNaN(numVal)) {
+      if (rawValue === null || rawValue === undefined || String(rawValue).trim() === '') {
+        // empty cell in series: warning, can default to 0
         issues.push({
-          type: 'error',
-          message: `La ligne ${rowNum} contient une valeur non numérique : "${rawValue}".`,
+          type: 'warning',
+          message: `La ligne ${rowNum} a une valeur vide dans la colonne "${colName}". Elle sera initialisée à 0.`,
           row: rowNum,
-          column: raw.headers[1] || 'Colonne 2',
+          column: colName,
         });
-      } else if (!Number.isFinite(numVal)) {
-        issues.push({
-          type: 'error',
-          message: `La ligne ${rowNum} contient une valeur infinie ou invalide.`,
-          row: rowNum,
-          column: raw.headers[1] || 'Colonne 2',
-        });
+      } else {
+        let numVal: number;
+        if (typeof rawValue === 'number') {
+          numVal = rawValue;
+        } else {
+          const cleanStr = String(rawValue).trim().replace(/\s+/g, '').replace(',', '.');
+          numVal = Number(cleanStr);
+        }
+
+        if (Number.isNaN(numVal)) {
+          issues.push({
+            type: 'error',
+            message: `La ligne ${rowNum} contient une valeur non numérique dans "${colName}" : "${rawValue}".`,
+            row: rowNum,
+            column: colName,
+          });
+        } else if (!Number.isFinite(numVal)) {
+          issues.push({
+            type: 'error',
+            message: `La ligne ${rowNum} contient une valeur infinie ou invalide dans "${colName}".`,
+            row: rowNum,
+            column: colName,
+          });
+        }
       }
     }
   });
@@ -138,5 +145,6 @@ export function validateRawData(raw: RawParsedData): ValidationResult {
   return {
     isValid: !hasFatalErrors,
     issues,
+    detectedSeriesCount: seriesCount,
   };
 }

@@ -55,11 +55,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     height: resolution.height,
     theme: project.theme,
     mode: project.animation.mode,
+    multiSeriesMode: project.animation.multiSeriesMode,
     title: project.title,
     subtitle: project.subtitle,
     source: project.source,
     labelColumn: project.dataset.labelColumn,
     valueColumn: project.dataset.valueColumn,
+    seriesColumns: project.dataset.seriesColumns,
+    showTimeWatermark: project.animation.showTimeWatermark,
+    showLegend: project.animation.showLegend,
   };
 
   const cleanFilename = (ext: string) => {

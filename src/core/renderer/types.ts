@@ -3,8 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChartMode } from '../../models/AnimationConfig.ts';
+import { ChartMode, MultiSeriesMode } from '../../models/AnimationConfig.ts';
 import { Theme } from '../../models/Theme.ts';
+
+export interface GroupedBarSeriesValue {
+  name: string;
+  value: number;
+  barLengthRatio: number;
+  color: string;
+}
 
 export interface InterpolatedItem {
   id: string;
@@ -18,6 +25,10 @@ export interface InterpolatedItem {
   bubbleRadiusRatio: number; // [0, 1]
   opacity: number;
   colorIndex: number;
+  
+  // Grouped bars multi-series support
+  groupedSeriesValues?: GroupedBarSeriesValue[];
+
   // Deterministic bubble positions
   bubbleXRatio?: number;
   bubbleYRatio?: number;
@@ -32,6 +43,11 @@ export interface AnimationState {
   absMax: number;
   hasNegative: boolean;
   zeroRatio: number; // 0..1 horizontal position of value 0
+  
+  // Temporal Watermark & Multi-Series Info
+  timeWatermark?: string; // e.g. "2024", "T3"
+  seriesColumns?: string[];
+  activeSeriesIndex?: number;
 }
 
 export interface RenderConfig {
@@ -39,11 +55,15 @@ export interface RenderConfig {
   height: number;
   theme: Theme;
   mode: ChartMode;
+  multiSeriesMode?: MultiSeriesMode;
   title: string;
   subtitle?: string;
   source?: string;
   labelColumn: string;
   valueColumn: string;
+  seriesColumns?: string[];
+  showTimeWatermark?: boolean;
+  showLegend?: boolean;
 }
 
 export interface ChartRenderer {

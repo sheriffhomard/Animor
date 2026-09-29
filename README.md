@@ -13,9 +13,13 @@ Conçue selon une philosophie **100% Local-First**, Animor fonctionne entièreme
   * Glisser-déposer de fichiers **CSV** avec détection automatique du séparateur (virgule `,`, point-virgule `;`, tabulation `\t`).
   * Collage direct depuis le presse-papier (**Ctrl+V**) avec aperçu immédiat.
   * Éditeur manuel intégré (ajout, modification, suppression de lignes).
-* **Validation stricte V1** :
-  * Exactement 2 colonnes (Label et Valeur).
-  * 1 à 10 lignes maximum.
+* **Capacité étendue & Traitement de données réelles** :
+  * Prise en charge de jeux de données allant de quelques lignes à **plusieurs centaines ou milliers de lignes**.
+  * **Pagination interactive** (10, 25, 50, 100 lignes par page) avec navigation rapide.
+  * **Moteur de recherche et filtre instantané** pour naviguer dans les grands tableaux.
+  * **Statistiques calculées en direct** : total de lignes, somme, moyenne, min, max.
+  * **Limite d'animation configurable** : afficher au choix le Top 10, Top 15, Top 20, Top 30, Top 50, Top 100 ou l'intégralité des données (« Tous »).
+  * Critères de sélection automatique : plus grandes valeurs (Top), plus petites valeurs (Bottom) ou ordre original du fichier.
   * Détection d'en-tête, des valeurs numériques (valeurs négatives et nulles pleinement prises en charge), des cellules vides, de NaN/Infinity et des doublons de labels.
 * **Moteur d'animation fluide** :
   * 3 modes de rendu : **Barres horizontales**, **Classement animé (Ranking)**, **Bulles proportionnelles**.
@@ -76,11 +80,11 @@ npm run build
 
 ---
 
-## 🎯 Limites de la Version 1 (V1)
+## 🎯 Spécifications & Formats
 
 1. **Exactement 2 colonnes logiques** : Première colonne = Label (texte), Deuxième colonne = Valeur (nombre).
-2. **Capacité** : 1 ligne minimum, 10 lignes maximum.
-3. **Format Vidéo** : Export vidéo V1 en WebM natif (supporté par Chrome, Firefox, Edge).
+2. **Capacité** : De 1 à plusieurs milliers de lignes en mémoire, avec sous-ensemble d'animation configurable (Top 10 à 100, ou Tous) pour une fluidité optimale.
+3. **Format Vidéo** : Export vidéo V1 en WebM natif 30 FPS (supporté par Chrome, Firefox, Edge).
 
 ---
 

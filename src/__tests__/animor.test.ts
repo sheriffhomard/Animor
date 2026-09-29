@@ -95,25 +95,48 @@ describe('Validator', () => {
     expect(res.issues.length).toBe(0);
   });
 
-  it('rejects 3 columns', () => {
+  it('accepts multi-series datasets with 3 or more columns', () => {
     const raw = {
-      headers: ['A', 'B', 'C'],
-      rows: [['x', '1', '2']],
+      headers: ['Pays', '2020', '2021', '2022'],
+      rows: [
+        ['France', '80', '85', '90'],
+        ['Allemagne', '75', '78', '82'],
+      ],
+    };
+    const res = validateRawData(raw);
+    expect(res.isValid).toBe(true);
+    expect(res.detectedSeriesCount).toBe(3);
+  });
+
+  it('rejects dataset with less than 2 columns', () => {
+    const raw = {
+      headers: ['SeuleColonne'],
+      rows: [['A'], ['B']],
     };
     const res = validateRawData(raw);
     expect(res.isValid).toBe(false);
-    expect(res.issues.some((i) => i.message.includes('2 colonnes'))).toBe(true);
+    expect(res.issues.some((i) => i.message.includes('au minimum 2 colonnes'))).toBe(true);
   });
 
-  it('rejects 11 rows (max 10 allowed)', () => {
-    const rows = Array.from({ length: 11 }, (_, i) => [`Item ${i + 1}`, `${i * 10}`]);
+  it('accepts large datasets with 500 rows', () => {
+    const rows = Array.from({ length: 500 }, (_, i) => [`Item ${i + 1}`, `${(i + 1) * 2}`]);
     const raw = {
       headers: ['Label', 'Value'],
       rows,
     };
     const res = validateRawData(raw);
+    expect(res.isValid).toBe(true);
+    expect(res.issues.length).toBe(0);
+  });
+
+  it('rejects empty dataset (0 rows)', () => {
+    const raw = {
+      headers: ['Label', 'Value'],
+      rows: [],
+    };
+    const res = validateRawData(raw);
     expect(res.isValid).toBe(false);
-    expect(res.issues.some((i) => i.message.includes('au maximum 10 lignes'))).toBe(true);
+    expect(res.issues.some((i) => i.message.includes('minimum 1 ligne'))).toBe(true);
   });
 
   it('flags non-numeric / NaN values', () => {
@@ -168,6 +191,20 @@ describe('Normalizer', () => {
     expect(dataset.rows[1].value).toBe(76);
     expect(dataset.rows[0].id).toBeDefined();
   });
+
+  it('normalizes multi-series data with multiple value columns', () => {
+    const raw = {
+      headers: ['Produit', 'T1', 'T2', 'T3'],
+      rows: [
+        ['Laptop', '100', '150', '200'],
+        ['Phone', '80', '120', '160'],
+      ],
+    };
+    const dataset = normalizeRawData(raw);
+    expect(dataset.isMultiSeries).toBe(true);
+    expect(dataset.seriesColumns).toEqual(['T1', 'T2', 'T3']);
+    expect(dataset.rows[0].values?.['T2']).toBe(150);
+  });
 });
 
 describe('Easing', () => {
@@ -213,6 +250,66 @@ describe('AnimationEngine', () => {
     const state = engine.getStateAt(1);
     expect(state.progress).toBe(1);
     expect(Math.round(state.items[0].currentValue)).toBe(SAMPLE_DATASET.rows[0].value);
+  });
+
+  it('filters a large dataset down to configured Top N items', () => {
+    const largeRows = Array.from({ length: 200 }, (_, i) => ({
+      id: `row-${i + 1}`,
+      label: `Entity ${i + 1}`,
+      value: (i + 1) * 5,
+    }));
+    const largeDataset = {
+      labelColumn: 'Entity',
+      valueColumn: 'Score',
+      rows: largeRows,
+    };
+
+    const top10Engine = new AnimationEngine(largeDataset, {
+      ...DEFAULT_ANIMATION_CONFIG,
+      maxVisibleItems: 10,
+      filterStrategy: 'top',
+    });
+
+    expect(top10Engine.getTotalCount()).toBe(200);
+    expect(top10Engine.getVisibleCount()).toBe(10);
+    const state = top10Engine.getStateAt(1);
+    expect(state.items.length).toBe(10);
+    // Top 1 value should be 200 * 5 = 1000
+    expect(state.items[0].targetValue).toBe(1000);
+  });
+
+  it('interpolates multi-series values across temporal race periods', () => {
+    const temporalDataset = {
+      labelColumn: 'Pays',
+      valueColumn: '2022',
+      seriesColumns: ['2020', '2021', '2022'],
+      isMultiSeries: true,
+      rows: [
+        { id: 'fra', label: 'France', value: 30, values: { '2020': 10, '2021': 20, '2022': 30 } },
+        { id: 'deu', label: 'Allemagne', value: 15, values: { '2020': 25, '2021': 20, '2022': 15 } },
+      ],
+    };
+
+    const raceEngine = new AnimationEngine(temporalDataset, {
+      ...DEFAULT_ANIMATION_CONFIG,
+      multiSeriesMode: 'time_race',
+      easing: 'linear',
+    });
+
+    // At progress 0: 2020 values (France: 10, Allemagne: 25)
+    const state0 = raceEngine.getStateAt(0);
+    expect(state0.items.find((i) => i.id === 'fra')?.currentValue).toBe(10);
+    expect(state0.timeWatermark).toBe('2020');
+
+    // At progress 0.5: middle of race, exactly period 2021 (France: 20, Allemagne: 20)
+    const stateHalf = raceEngine.getStateAt(0.5);
+    expect(Math.round(stateHalf.items.find((i) => i.id === 'fra')?.currentValue ?? 0)).toBe(20);
+    expect(stateHalf.timeWatermark).toBe('2021');
+
+    // At progress 1.0: end of race, period 2022 (France: 30, Allemagne: 15)
+    const state1 = raceEngine.getStateAt(1);
+    expect(state1.items.find((i) => i.id === 'fra')?.currentValue).toBe(30);
+    expect(state1.timeWatermark).toBe('2022');
   });
 });
 

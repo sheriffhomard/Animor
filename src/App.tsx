@@ -264,6 +264,10 @@ export default function App() {
                 dataset={project.dataset}
                 onDatasetChange={handleDatasetChange}
                 onOpenPasteModal={() => setIsPasteOpen(true)}
+                animationConfig={project.animation}
+                onAnimationConfigChange={(animation) =>
+                  setProject((prev) => ({ ...prev, animation, updatedAt: Date.now() }))
+                }
               />
             ) : (
               <StylePanel project={project} onProjectChange={setProject} />
