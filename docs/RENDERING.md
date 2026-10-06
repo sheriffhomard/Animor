@@ -13,26 +13,49 @@ La classe `SvgRenderer` implémente ce contrat et génère des chaînes SVG conf
 
 ---
 
-## Les 3 Modes de Visualisation
+## Modes de Visualisation & Règles d'Animation
 
-### Mode A : Barres Horizontales
-- Chaque ligne du tableau devient une barre horizontale avec coins arrondis (`rx`).
-- Prise en charge des valeurs positives et négatives :
-  - L'axe zéro est calculé automatiquement à la position relative `zeroRatio`.
-  - Les valeurs positives s'étendent vers la droite.
-  - Les valeurs négatives s'étendent vers la gauche avec un dégradé distinct.
-- Un point scintillant d'extrémité suit l'extrémité de chaque barre en mouvement.
+### 1. Barres Horizontales (`bars`)
+- Chaque ligne devient une barre horizontale avec coins arrondis (`rx`).
+- Prise en charge des valeurs positives et négatives avec calcul automatique du zéro relatif.
+- Compteur de valeur en direct et étincelle d'extrémité animée.
 
-### Mode B : Classement Animé (Ranking)
-- Les éléments sont ordonnés selon leur valeur finale décroissante.
-- Durant l'animation, chaque ligne glisse verticalement de sa position d'entrée à sa position finale (`currentRank`).
-- Un badge numérique stylisé (`#1`, `#2`, etc.) s'affiche à côté de chaque ligne avec mise en exergue du leader.
+### 2. Classement Animé (`ranking`)
+- Réordonnancement dynamique vertical basé sur la valeur instantanée (Bar Chart Race).
+- Badges de classement stylisés (`#1`, `#2`, etc.) et mise en valeur du leader.
 
-### Mode C : Bulles Déterministes
-- Chaque ligne est représentée par une sphère dont le rayon est proportionnel à la racine carrée de la valeur absolue :
-  $$r \propto \sqrt{|v| / v_{\max}}$$
-- Disposition déterministe par spirale de Fermat (angle d'or $\approx 137.5^\circ$) centrée dans le canevas. La disposition est 100% reproductible entre les images et les exports.
-- Dégradé tridimensionnel avec reflet supérieur pour un effet fluide de bulle de données.
+### 3. Bulles Proportionnelles (`bubbles`)
+- Sphères proportionnelles à la racine de la valeur absolue avec reflet tridimensionnel.
+- Disposition déterministe via la spirale dorée de Fermat (angle d'or $\approx 137.5^\circ$).
+
+### 4. Courbes (`lines`)
+- Tracé continu avec support de lissage cubique Bézier (`curveType: 'smooth'`) ou linéaire (`curveType: 'linear'`).
+- Animation progressive du trait via `stroke-dasharray` et `stroke-dashoffset`.
+- Puces de données interactives avec halo lumineux et étiquettes de valeurs.
+- Support multi-courbes avec légende et palette harmonieuse.
+
+### 5. Aires (`area`)
+- Courbes avec remplissage en dégradé descendant vers la ligne de base.
+- Opacité configurable (`areaOpacity`: 20% à 75%).
+- Révélation progressive horizontale synchronisée sur la timeline.
+
+### 6. Graphiques Empilés (`stacked_bars`)
+- Colonnes décomposées en segments cumulés pour comparer les contributions relatives.
+- Mode de cumul : Valeurs réelles absolues (`stackedMode: 'absolute'`) ou normalisation 100% (`stackedMode: 'percent'`).
+- Animation d'élévation successive des segments et affichage du total cumulé au sommet.
+
+### 7. Diagrammes Circulaires Animés (`pie`)
+- Format Anneau Donut (`pieStyle: 'donut'`) avec ratio central personnalisable (35% à 70%) ou disque plein (`pieStyle: 'pie'`).
+- Déroulement angulaire fluide de 0° à 360° synchronisé sur la timeline.
+- Valeur totale affichée au centre de l'anneau et légende latérale avec pourcentages instantanés.
+
+### 8. Nuages de Points (`scatter`)
+- Dispersion des points de données avec échelle ajustable (`scatterPointScale`).
+- Apparition avec effet pop-in étagé.
+- Ligne de tendance de régression linéaire ($y = mx + b$) dessinée dynamiquement.
+
+### 9. Graphiques Combinés (`combo`)
+- Superposition synchronisée : colonnes verticales pour la première série et courbe de tendance animée pour la seconde série avec points d'ancrage.
 
 ---
 

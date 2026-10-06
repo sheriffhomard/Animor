@@ -360,6 +360,102 @@ describe('SvgRenderer', () => {
     });
     expect(svgBubbles).toContain('class="bubbles-layer"');
   });
+
+  it('renders valid SVG for Line chart (Courbes) with progressive paths and points', () => {
+    const state = engine.getStateAt(1);
+    const svgLines = renderer.renderToSvgString(state, {
+      width: 1920,
+      height: 1080,
+      theme: DEFAULT_THEME,
+      mode: 'lines',
+      title: 'Courbes de Tendance',
+      labelColumn: 'Pays',
+      valueColumn: 'Valeur',
+      curveType: 'smooth',
+      showPoints: true,
+    });
+    expect(svgLines).toContain('class="lines-layer"');
+    expect(svgLines).toContain('stroke-dasharray');
+  });
+
+  it('renders valid SVG for Area chart (Aires) with gradient fills', () => {
+    const state = engine.getStateAt(1);
+    const svgArea = renderer.renderToSvgString(state, {
+      width: 1920,
+      height: 1080,
+      theme: DEFAULT_THEME,
+      mode: 'area',
+      title: 'Aires de Croissance',
+      labelColumn: 'Pays',
+      valueColumn: 'Valeur',
+      areaOpacity: 0.4,
+    });
+    expect(svgArea).toContain('class="area-layer"');
+    expect(svgArea).toContain('linearGradient');
+  });
+
+  it('renders valid SVG for Stacked Bars (Graphiques Empilés)', () => {
+    const state = engine.getStateAt(1);
+    const svgStacked = renderer.renderToSvgString(state, {
+      width: 1920,
+      height: 1080,
+      theme: DEFAULT_THEME,
+      mode: 'stacked_bars',
+      title: 'Ventes Empilées',
+      labelColumn: 'Pays',
+      valueColumn: 'Valeur',
+      stackedMode: 'absolute',
+    });
+    expect(svgStacked).toContain('class="stacked-bars-layer"');
+  });
+
+  it('renders valid SVG for Animated Pie / Donut Chart', () => {
+    const state = engine.getStateAt(1);
+    const svgPie = renderer.renderToSvgString(state, {
+      width: 1080,
+      height: 1080,
+      theme: DEFAULT_THEME,
+      mode: 'pie',
+      title: 'Répartition Donut',
+      labelColumn: 'Pays',
+      valueColumn: 'Valeur',
+      pieStyle: 'donut',
+      donutHoleRatio: 0.55,
+      showPieLabels: true,
+    });
+    expect(svgPie).toContain('class="pie-layer"');
+    expect(svgPie).toContain('TOTAL');
+  });
+
+  it('renders valid SVG for Scatter Plot with trendline', () => {
+    const state = engine.getStateAt(1);
+    const svgScatter = renderer.renderToSvgString(state, {
+      width: 1920,
+      height: 1080,
+      theme: DEFAULT_THEME,
+      mode: 'scatter',
+      title: 'Dispersion',
+      labelColumn: 'Pays',
+      valueColumn: 'Valeur',
+      showTrendline: true,
+    });
+    expect(svgScatter).toContain('class="scatter-points-layer"');
+  });
+
+  it('renders valid SVG for Combo Chart (Barres + Courbe combinées)', () => {
+    const state = engine.getStateAt(1);
+    const svgCombo = renderer.renderToSvgString(state, {
+      width: 1920,
+      height: 1080,
+      theme: DEFAULT_THEME,
+      mode: 'combo',
+      title: 'Graphique Combiné',
+      labelColumn: 'Pays',
+      valueColumn: 'Valeur',
+    });
+    expect(svgCombo).toContain('class="combo-bars"');
+    expect(svgCombo).toContain('class="combo-line"');
+  });
 });
 
 describe('Export Standalone HTML', () => {

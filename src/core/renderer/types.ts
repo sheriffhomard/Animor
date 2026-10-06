@@ -26,7 +26,7 @@ export interface InterpolatedItem {
   opacity: number;
   colorIndex: number;
   
-  // Grouped bars multi-series support
+  // Grouped and Stacked bars multi-series support
   groupedSeriesValues?: GroupedBarSeriesValue[];
 
   // Deterministic bubble positions
@@ -64,6 +64,18 @@ export interface RenderConfig {
   seriesColumns?: string[];
   showTimeWatermark?: boolean;
   showLegend?: boolean;
+
+  // Chart-specific configurations
+  curveType?: 'smooth' | 'linear';
+  showPoints?: boolean;
+  areaOpacity?: number;
+  stackedMode?: 'absolute' | 'percent';
+  pieStyle?: 'donut' | 'pie';
+  donutHoleRatio?: number;
+  showPieLabels?: boolean;
+  scatterPointScale?: number;
+  showTrendline?: boolean;
+  comboLineSeries?: string;
 }
 
 export interface ChartRenderer {

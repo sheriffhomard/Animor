@@ -13,6 +13,13 @@ import {
   Clock,
   Sparkles,
   Maximize2,
+  LineChart,
+  AreaChart,
+  Layers,
+  PieChart,
+  ScatterChart,
+  Activity,
+  Sliders,
 } from 'lucide-react';
 import { Project } from '../../models/Project.ts';
 import {
@@ -48,6 +55,12 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
     { mode: 'bars', label: 'Barres', icon: BarChart2 },
     { mode: 'ranking', label: 'Classement', icon: TrendingUp },
     { mode: 'bubbles', label: 'Bulles', icon: CircleDot },
+    { mode: 'lines', label: 'Courbes', icon: LineChart },
+    { mode: 'area', label: 'Aires', icon: AreaChart },
+    { mode: 'stacked_bars', label: 'Empilées', icon: Layers },
+    { mode: 'pie', label: 'Circulaire', icon: PieChart },
+    { mode: 'scatter', label: 'Nuage', icon: ScatterChart },
+    { mode: 'combo', label: 'Combiné', icon: Activity },
   ];
 
   const aspectRatios: { ratio: AspectRatio; label: string; sub: string }[] = [
@@ -146,7 +159,7 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
         </div>
       )}
 
-      {/* 1. Mode de Visualisation */}
+      {/* 1. Mode de Visualisation (9 modes) */}
       <div className="space-y-2">
         <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
@@ -171,6 +184,201 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
             );
           })}
         </div>
+
+        {/* 1.1 Configuration Spécifique au Type Choisi */}
+        {animation.mode === 'lines' && (
+          <div className="mt-2 p-3 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <span className="font-bold text-slate-300 block">Règles des Courbes</span>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Tracé :</span>
+              <div className="flex gap-1">
+                {(['smooth', 'linear'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => updateAnimation({ curveType: t })}
+                    className={`px-2 py-1 rounded text-[11px] font-semibold transition ${
+                      (animation.curveType ?? 'smooth') === t
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {t === 'smooth' ? 'Lissée (Bézier)' : 'Linéaire'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-900">
+              <span className="text-slate-400">Puces de données :</span>
+              <input
+                type="checkbox"
+                checked={animation.showPoints !== false}
+                onChange={(e) => updateAnimation({ showPoints: e.target.checked })}
+                className="accent-indigo-500 cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+
+        {animation.mode === 'area' && (
+          <div className="mt-2 p-3 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <span className="font-bold text-slate-300 block">Règles des Aires</span>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Lissage :</span>
+              <div className="flex gap-1">
+                {(['smooth', 'linear'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => updateAnimation({ curveType: t })}
+                    className={`px-2 py-1 rounded text-[11px] font-semibold transition ${
+                      (animation.curveType ?? 'smooth') === t
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {t === 'smooth' ? 'Lissée' : 'Linéaire'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-900">
+              <span className="text-slate-400">Opacité dégradé :</span>
+              <div className="flex gap-1">
+                {[0.2, 0.35, 0.5, 0.75].map((op) => (
+                  <button
+                    key={op}
+                    onClick={() => updateAnimation({ areaOpacity: op })}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition ${
+                      (animation.areaOpacity ?? 0.35) === op
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {Math.round(op * 100)}%
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {animation.mode === 'stacked_bars' && (
+          <div className="mt-2 p-3 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <span className="font-bold text-slate-300 block">Règles Empilées</span>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Mode de cumul :</span>
+              <div className="flex gap-1">
+                {(['absolute', 'percent'] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => updateAnimation({ stackedMode: m })}
+                    className={`px-2 py-1 rounded text-[11px] font-semibold transition ${
+                      (animation.stackedMode ?? 'absolute') === m
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {m === 'absolute' ? 'Valeurs Réelles' : '100% Proportionnel'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {animation.mode === 'pie' && (
+          <div className="mt-2 p-3 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <span className="font-bold text-slate-300 block">Règles Diagramme Circulaire</span>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Forme :</span>
+              <div className="flex gap-1">
+                {(['donut', 'pie'] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => updateAnimation({ pieStyle: s })}
+                    className={`px-2 py-1 rounded text-[11px] font-semibold transition ${
+                      (animation.pieStyle ?? 'donut') === s
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {s === 'donut' ? 'Anneau (Donut)' : 'Disque Plein'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {animation.pieStyle !== 'pie' && (
+              <div className="flex items-center justify-between pt-1 border-t border-slate-900">
+                <span className="text-slate-400">Trou central :</span>
+                <div className="flex gap-1">
+                  {[0.4, 0.55, 0.7].map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => updateAnimation({ donutHoleRatio: r })}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition ${
+                        (animation.donutHoleRatio ?? 0.55) === r
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-slate-900 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {Math.round(r * 100)}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-1 border-t border-slate-900">
+              <span className="text-slate-400">Afficher légende & pourcentages :</span>
+              <input
+                type="checkbox"
+                checked={animation.showPieLabels !== false}
+                onChange={(e) => updateAnimation({ showPieLabels: e.target.checked })}
+                className="accent-indigo-500 cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+
+        {animation.mode === 'scatter' && (
+          <div className="mt-2 p-3 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2 text-xs">
+            <span className="font-bold text-slate-300 block">Règles Nuage de Points</span>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Taille des points :</span>
+              <div className="flex gap-1">
+                {[0.7, 1.0, 1.4].map((scale) => (
+                  <button
+                    key={scale}
+                    onClick={() => updateAnimation({ scatterPointScale: scale })}
+                    className={`px-2 py-1 rounded text-[10px] font-semibold transition ${
+                      (animation.scatterPointScale ?? 1.0) === scale
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-900 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {scale === 0.7 ? 'Petit' : scale === 1.0 ? 'Normal' : 'Grand'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-900">
+              <span className="text-slate-400">Ligne de tendance (Trendline) :</span>
+              <input
+                type="checkbox"
+                checked={animation.showTrendline !== false}
+                onChange={(e) => updateAnimation({ showTrendline: e.target.checked })}
+                className="accent-indigo-500 cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+
+        {animation.mode === 'combo' && (
+          <div className="mt-2 p-3 bg-slate-950/70 border border-slate-800 rounded-xl space-y-1 text-xs">
+            <span className="font-bold text-slate-300 block">Graphique Combiné</span>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Superposition synchronisée : colonnes verticales pour la première série et courbe de tendance animée pour la seconde série.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* 2. Format & Ratio */}
@@ -214,7 +422,7 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
               value={project.title}
               onChange={(e) => onProjectChange({ ...project, title: e.target.value })}
               className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              placeholder="Ex: Top 10 Énergies Renouvelables"
+              placeholder="Ex: Évolution Comparée"
             />
           </div>
           <div>
@@ -224,7 +432,7 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
               value={project.subtitle || ''}
               onChange={(e) => onProjectChange({ ...project, subtitle: e.target.value })}
               className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              placeholder="Ex: En gigawatts par an"
+              placeholder="Ex: Analyse 2020-2024"
             />
           </div>
           <div>
@@ -234,7 +442,7 @@ export const StylePanel: React.FC<StylePanelProps> = ({ project, onProjectChange
               value={project.source || ''}
               onChange={(e) => onProjectChange({ ...project, source: e.target.value })}
               className="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              placeholder="Ex: Eurostat 2026"
+              placeholder="Ex: Données Internes"
             />
           </div>
         </div>

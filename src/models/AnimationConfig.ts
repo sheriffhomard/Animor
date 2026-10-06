@@ -5,7 +5,17 @@
 
 export type EasingType = 'linear' | 'easeIn' | 'easeOut' | 'easeInOut';
 
-export type ChartMode = 'bars' | 'ranking' | 'bubbles' | 'grouped_bars';
+export type ChartMode =
+  | 'bars'
+  | 'ranking'
+  | 'bubbles'
+  | 'grouped_bars'
+  | 'lines'
+  | 'area'
+  | 'stacked_bars'
+  | 'pie'
+  | 'scatter'
+  | 'combo';
 
 export type MultiSeriesMode = 'time_race' | 'grouped' | 'single';
 
@@ -39,6 +49,18 @@ export interface AnimationConfig {
   activeSeries?: string; // Selected series if single mode or initial
   showTimeWatermark?: boolean; // Display large period/year watermark during time race
   showLegend?: boolean; // Display legend for multi-series
+
+  // Specific rules and parameters per chart type
+  curveType?: 'smooth' | 'linear'; // Lines / Area
+  showPoints?: boolean; // Lines / Area / Combo
+  areaOpacity?: number; // Area (0..1)
+  stackedMode?: 'absolute' | 'percent'; // Stacked Bars
+  pieStyle?: 'donut' | 'pie'; // Pie / Donut
+  donutHoleRatio?: number; // 0..0.85
+  showPieLabels?: boolean;
+  scatterPointScale?: number; // 0.5..2
+  showTrendline?: boolean; // Scatter plot regression line
+  comboLineSeries?: string; // Series used for the line in combo chart
 }
 
 export const DEFAULT_ANIMATION_CONFIG: AnimationConfig = {
@@ -53,4 +75,15 @@ export const DEFAULT_ANIMATION_CONFIG: AnimationConfig = {
   multiSeriesMode: 'time_race',
   showTimeWatermark: true,
   showLegend: true,
+
+  // Defaults for new chart types
+  curveType: 'smooth',
+  showPoints: true,
+  areaOpacity: 0.35,
+  stackedMode: 'absolute',
+  pieStyle: 'donut',
+  donutHoleRatio: 0.55,
+  showPieLabels: true,
+  scatterPointScale: 1,
+  showTrendline: true,
 };

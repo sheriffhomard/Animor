@@ -21,8 +21,16 @@ Conçue selon une philosophie **100% Local-First**, Animor fonctionne entièreme
   * **Limite d'animation configurable** : afficher au choix le Top 10, Top 15, Top 20, Top 30, Top 50, Top 100 ou l'intégralité des données (« Tous »).
   * Critères de sélection automatique : plus grandes valeurs (Top), plus petites valeurs (Bottom) ou ordre original du fichier.
   * Détection d'en-tête, des valeurs numériques (valeurs négatives et nulles pleinement prises en charge), des cellules vides, de NaN/Infinity et des doublons de labels.
-* **Moteur d'animation fluide** :
-  * 3 modes de rendu : **Barres horizontales**, **Classement animé (Ranking)**, **Bulles proportionnelles**.
+* **Moteur d'animation fluide & 9 types de visualisations** :
+  * **Barres horizontales** : barres étagées avec axe zéro dynamique et compteurs en direct.
+  * **Classement animé (Bar Chart Race)** : glissement vertical fluide des rangs avec badges (#1, #2...).
+  * **Bulles proportionnelles** : disposition déterministe via la spirale dorée de Fermat.
+  * **Courbes (Line Chart)** : tracé progressif (lissé Bézier ou linéaire) avec puces de données lumineuses.
+  * **Aires (Area Chart)** : remplissage en dégradé avec opacité configurable (20% à 75%).
+  * **Graphiques empilés (Stacked Bars)** : cumul absolu ou normalisation proportionnelle 100%.
+  * **Diagrammes circulaires animés (Pie / Donut)** : déroulement angulaire à 360°, format anneau ou plein, avec total central.
+  * **Nuages de points (Scatter Plot)** : dispersion avec pop-in élastique et droite de régression dynamique (trendline).
+  * **Graphiques combinés (Combo)** : barres verticales synchronisées avec courbe de tendance superposée.
   * Interpolation géométrique et temporelle basée sur `requestAnimationFrame`.
   * Courbes d'atténuation (Easing) : *Linear*, *Ease In*, *Ease Out*, *Ease In Out*.
   * Timeline interactive avec Scrubber, Lecture / Pause, Recommencer, Boucle, Vitesse réglable (0.5x, 1x, 1.5x, 2x).

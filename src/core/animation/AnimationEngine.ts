@@ -291,9 +291,17 @@ export class AnimationEngine {
       const absRatio = this.absMax > 0 ? Math.abs(currentValue) / this.absMax : 0;
       const bubbleRadiusRatio = Math.sqrt(absRatio);
 
-      // Grouped bars multi-series support
+      // Multi-series values support for grouped, stacked, lines, area, combo
       let groupedSeriesValues: GroupedBarSeriesValue[] | undefined = undefined;
-      if (multiMode === 'grouped' || this.config.mode === 'grouped_bars') {
+      if (
+        isMultiSeries ||
+        multiMode === 'grouped' ||
+        this.config.mode === 'grouped_bars' ||
+        this.config.mode === 'stacked_bars' ||
+        this.config.mode === 'lines' ||
+        this.config.mode === 'area' ||
+        this.config.mode === 'combo'
+      ) {
         const growth = easeFn(Math.min(1, Math.max(0, (progress - 0.05) / 0.8)));
         groupedSeriesValues = seriesList.map((col, sIdx) => {
           const rawVal = row.values ? (row.values[col] ?? 0) : row.value;

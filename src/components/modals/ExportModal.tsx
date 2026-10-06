@@ -64,6 +64,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     seriesColumns: project.dataset.seriesColumns,
     showTimeWatermark: project.animation.showTimeWatermark,
     showLegend: project.animation.showLegend,
+    curveType: project.animation.curveType,
+    showPoints: project.animation.showPoints,
+    areaOpacity: project.animation.areaOpacity,
+    stackedMode: project.animation.stackedMode,
+    pieStyle: project.animation.pieStyle,
+    donutHoleRatio: project.animation.donutHoleRatio,
+    showPieLabels: project.animation.showPieLabels,
+    scatterPointScale: project.animation.scatterPointScale,
+    showTrendline: project.animation.showTrendline,
+    comboLineSeries: project.animation.comboLineSeries,
   };
 
   const cleanFilename = (ext: string) => {
